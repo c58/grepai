@@ -367,6 +367,17 @@ func initializeEmbedder(ctx context.Context, cfg *config.Config) (embedder.Embed
 			opts = append(opts, embedder.WithOpenAIDimensions(*cfg.Embedder.Dimensions))
 		}
 		return embedder.NewOpenAIEmbedder(opts...)
+	case "voyageai":
+		opts := []embedder.VoyageAIOption{
+			embedder.WithVoyageAIModel(cfg.Embedder.Model),
+			embedder.WithVoyageAIKey(cfg.Embedder.APIKey),
+			embedder.WithVoyageAIEndpoint(cfg.Embedder.Endpoint),
+			embedder.WithVoyageAIParallelism(cfg.Embedder.Parallelism),
+		}
+		if cfg.Embedder.Dimensions != nil {
+			opts = append(opts, embedder.WithVoyageAIDimensions(*cfg.Embedder.Dimensions))
+		}
+		return embedder.NewVoyageAIEmbedder(opts...)
 	case "lmstudio":
 		opts := []embedder.LMStudioOption{
 			embedder.WithLMStudioEndpoint(cfg.Embedder.Endpoint),

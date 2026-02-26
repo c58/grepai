@@ -561,6 +561,17 @@ func (s *Server) createWorkspaceEmbedder(ws *config.Workspace) (embedder.Embedde
 			opts = append(opts, embedder.WithOpenAIDimensions(*ws.Embedder.Dimensions))
 		}
 		return embedder.NewOpenAIEmbedder(opts...)
+	case "voyageai":
+		opts := []embedder.VoyageAIOption{
+			embedder.WithVoyageAIModel(ws.Embedder.Model),
+			embedder.WithVoyageAIKey(ws.Embedder.APIKey),
+			embedder.WithVoyageAIEndpoint(ws.Embedder.Endpoint),
+			embedder.WithVoyageAIParallelism(ws.Embedder.Parallelism),
+		}
+		if ws.Embedder.Dimensions != nil {
+			opts = append(opts, embedder.WithVoyageAIDimensions(*ws.Embedder.Dimensions))
+		}
+		return embedder.NewVoyageAIEmbedder(opts...)
 	case "lmstudio":
 		opts := []embedder.LMStudioOption{
 			embedder.WithLMStudioEndpoint(ws.Embedder.Endpoint),
@@ -1287,6 +1298,17 @@ func (s *Server) createEmbedder(cfg *config.Config) (embedder.Embedder, error) {
 			opts = append(opts, embedder.WithOpenAIDimensions(*cfg.Embedder.Dimensions))
 		}
 		return embedder.NewOpenAIEmbedder(opts...)
+	case "voyageai":
+		opts := []embedder.VoyageAIOption{
+			embedder.WithVoyageAIModel(cfg.Embedder.Model),
+			embedder.WithVoyageAIKey(cfg.Embedder.APIKey),
+			embedder.WithVoyageAIEndpoint(cfg.Embedder.Endpoint),
+			embedder.WithVoyageAIParallelism(cfg.Embedder.Parallelism),
+		}
+		if cfg.Embedder.Dimensions != nil {
+			opts = append(opts, embedder.WithVoyageAIDimensions(*cfg.Embedder.Dimensions))
+		}
+		return embedder.NewVoyageAIEmbedder(opts...)
 	case "lmstudio":
 		opts := []embedder.LMStudioOption{
 			embedder.WithLMStudioEndpoint(cfg.Embedder.Endpoint),

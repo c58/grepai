@@ -73,7 +73,7 @@ type BoostRule struct {
 }
 
 type EmbedderConfig struct {
-	Provider    string `yaml:"provider"` // ollama | lmstudio | openai
+	Provider    string `yaml:"provider"` // ollama | lmstudio | openai | voyageai
 	Model       string `yaml:"model"`
 	Endpoint    string `yaml:"endpoint,omitempty"`
 	APIKey      string `yaml:"api_key,omitempty"`
@@ -83,6 +83,7 @@ type EmbedderConfig struct {
 
 // GetDimensions returns the configured dimensions or a default value.
 // For OpenAI, defaults to 1536 (text-embedding-3-small).
+// For Voyage AI, defaults to 1024 (voyage-code-3).
 // For Ollama/LMStudio, defaults to 768 (nomic-embed-text).
 func (e *EmbedderConfig) GetDimensions() int {
 	if e.Dimensions != nil {
@@ -91,6 +92,8 @@ func (e *EmbedderConfig) GetDimensions() int {
 	switch e.Provider {
 	case "openai":
 		return 1536
+	case "voyageai":
+		return 1024
 	default:
 		return 768
 	}
@@ -369,6 +372,8 @@ func (c *Config) applyDefaults() {
 			c.Embedder.Endpoint = "http://127.0.0.1:1234"
 		case "openai":
 			c.Embedder.Endpoint = "https://api.openai.com/v1"
+		case "voyageai":
+			c.Embedder.Endpoint = "https://api.voyageai.com/v1"
 		default:
 			c.Embedder.Endpoint = defaults.Embedder.Endpoint
 		}
@@ -387,7 +392,7 @@ func (c *Config) applyDefaults() {
 		}
 	}
 
-	// Parallelism default (only used by OpenAI embedder)
+	// Parallelism default (used by OpenAI and Voyage AI embedders)
 	if c.Embedder.Parallelism <= 0 {
 		c.Embedder.Parallelism = 4
 	}

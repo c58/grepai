@@ -169,6 +169,20 @@ func runSearch(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("failed to initialize OpenAI embedder: %w", err)
 		}
+	case "voyageai":
+		opts := []embedder.VoyageAIOption{
+			embedder.WithVoyageAIModel(cfg.Embedder.Model),
+			embedder.WithVoyageAIKey(cfg.Embedder.APIKey),
+			embedder.WithVoyageAIEndpoint(cfg.Embedder.Endpoint),
+		}
+		if cfg.Embedder.Dimensions != nil {
+			opts = append(opts, embedder.WithVoyageAIDimensions(*cfg.Embedder.Dimensions))
+		}
+		var err error
+		emb, err = embedder.NewVoyageAIEmbedder(opts...)
+		if err != nil {
+			return fmt.Errorf("failed to initialize Voyage AI embedder: %w", err)
+		}
 	case "lmstudio":
 		opts := []embedder.LMStudioOption{
 			embedder.WithLMStudioEndpoint(cfg.Embedder.Endpoint),
@@ -492,6 +506,19 @@ func runWorkspaceSearch(ctx context.Context, query string) error {
 		emb, err = embedder.NewOpenAIEmbedder(opts...)
 		if err != nil {
 			return fmt.Errorf("failed to initialize OpenAI embedder: %w", err)
+		}
+	case "voyageai":
+		opts := []embedder.VoyageAIOption{
+			embedder.WithVoyageAIModel(ws.Embedder.Model),
+			embedder.WithVoyageAIKey(ws.Embedder.APIKey),
+			embedder.WithVoyageAIEndpoint(ws.Embedder.Endpoint),
+		}
+		if ws.Embedder.Dimensions != nil {
+			opts = append(opts, embedder.WithVoyageAIDimensions(*ws.Embedder.Dimensions))
+		}
+		emb, err = embedder.NewVoyageAIEmbedder(opts...)
+		if err != nil {
+			return fmt.Errorf("failed to initialize Voyage AI embedder: %w", err)
 		}
 	case "lmstudio":
 		opts := []embedder.LMStudioOption{

@@ -30,14 +30,14 @@ var initCmd = &cobra.Command{
 
 This command will:
 - Create .grepai/config.yaml with default settings
-- Prompt for embedding provider (Ollama or OpenAI)
+- Prompt for embedding provider (Ollama, LM Studio, OpenAI, or Voyage AI)
 - Prompt for storage backend (GOB file or PostgreSQL)
 - Add .grepai/ to .gitignore if present`,
 	RunE: runInit,
 }
 
 func init() {
-	initCmd.Flags().StringVarP(&initProvider, "provider", "p", "", "Embedding provider (ollama, lmstudio, or openai)")
+	initCmd.Flags().StringVarP(&initProvider, "provider", "p", "", "Embedding provider (ollama, lmstudio, openai, or voyageai)")
 	initCmd.Flags().StringVarP(&initBackend, "backend", "b", "", "Storage backend (gob, postgres, or qdrant)")
 	initCmd.Flags().BoolVar(&initNonInteractive, "yes", false, "Use defaults without prompting")
 	initCmd.Flags().BoolVar(&initInherit, "inherit", false, "Inherit configuration from main worktree (for git worktrees)")
@@ -104,6 +104,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 			fmt.Println("  1) ollama (local, privacy-first, requires Ollama running)")
 			fmt.Println("  2) lmstudio (local, OpenAI-compatible, requires LM Studio running)")
 			fmt.Println("  3) openai (cloud, requires API key)")
+			fmt.Println("  4) voyageai (cloud, optimized for code, requires API key)")
 			fmt.Print("Choice [1]: ")
 
 			input, _ := reader.ReadString('\n')
@@ -127,6 +128,11 @@ func runInit(cmd *cobra.Command, args []string) error {
 				cfg.Embedder.Model = "text-embedding-3-small"
 				cfg.Embedder.Endpoint = "https://api.openai.com/v1"
 				// OpenAI: leave Dimensions nil to use model's native dimensions
+			case "4", "voyageai":
+				cfg.Embedder.Provider = "voyageai"
+				cfg.Embedder.Model = "voyage-code-3"
+				cfg.Embedder.Endpoint = "https://api.voyageai.com/v1"
+				// Voyage AI: leave Dimensions nil to use model's native dimensions (1024)
 			default:
 				cfg.Embedder.Provider = "ollama"
 				fmt.Print("Ollama endpoint [http://localhost:11434]: ")
@@ -149,6 +155,10 @@ func runInit(cmd *cobra.Command, args []string) error {
 				cfg.Embedder.Model = "text-embedding-3-small"
 				cfg.Embedder.Endpoint = "https://api.openai.com/v1"
 				// OpenAI: leave Dimensions nil to use model's native dimensions
+			case "voyageai":
+				cfg.Embedder.Model = "voyage-code-3"
+				cfg.Embedder.Endpoint = "https://api.voyageai.com/v1"
+				// Voyage AI: leave Dimensions nil to use model's native dimensions (1024)
 			}
 		}
 
@@ -253,6 +263,8 @@ func runInit(cmd *cobra.Command, args []string) error {
 		fmt.Printf("  Endpoint: %s\n", cfg.Embedder.Endpoint)
 	case "openai":
 		fmt.Println("\nMake sure OPENAI_API_KEY is set in your environment.")
+	case "voyageai":
+		fmt.Println("\nMake sure VOYAGE_API_KEY is set in your environment.")
 	}
 
 	return nil
